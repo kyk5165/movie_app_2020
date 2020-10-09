@@ -1,74 +1,52 @@
 import React from "react";
-import PropTypes from "prop-types";
+import axios from "axios";
+import Movie from "./Movie";
+import "./App.css";
 
-const foodILike = [
-  {
-    id: 1,
-    name: "콩나물국밥",
-    image:
-      "https://www.koreanbapsang.com/wp-content/uploads/2011/12/DSC1079-300x200.jpg",
-    rating: 5,
-  },
-  {
-    id: 2,
-    name: "짜장면",
-    image:
-      "https://www.koreanbapsang.com/wp-content/uploads/2011/05/DSC1677-1-300x200.jpg",
-    rating: 4.9,
-  },
-  {
-    id: 3,
-    name: "김치볶음밥",
-    image:
-      "https://www.koreanbapsang.com/wp-content/uploads/2010/12/DSC_1097-2-300x200.jpg",
-    rating: 4.8,
-  },
-  {
-    id: 4,
-    name: "만두",
-    image:
-      "https://www.koreanbapsang.com/wp-content/uploads/2012/01/DSC_0153-300x200.jpg",
-    rating: 3,
-  },
-  {
-    id: 5,
-    name: "설렁탕",
-    image:
-      "https://www.koreanbapsang.com/wp-content/uploads/2013/02/DSC5969-2-300x200.jpg",
-    rating: 4.2,
-  },
-];
-
-function Food({ name, picture, rating }) {
-  return (
-    <div>
-      <h2>I like {name}</h2>
-      <h4>{rating}/5.0</h4>
-      <img src={picture} alt={name} />
-    </div>
-  );
-}
-
-Food.propTypes = {
-  name: PropTypes.string.isRequired,
-  picture: PropTypes.string.isRequired,
-  rating: PropTypes.number.isRequired,
-};
-
-function App() {
-  return (
-    <div>
-      {foodILike.map((dish) => (
-        <Food
-          key={dish.id}
-          name={dish.name}
-          picture={dish.image}
-          rating={dish.rating}
-        />
-      ))}
-      cle
-    </div>
-  );
+class App extends React.Component {
+  state = {
+    isLoading: true,
+    movies: [],
+  };
+  getMovies = async () => {
+    const {
+      data: {
+        data: { movies },
+      },
+    } = await axios.get(
+      "https://yts-proxy.now.sh/list_movies.json?sort_by=rating"
+    );
+    this.setState({ movies, isLoading: false });
+  };
+  componentDidMount() {
+    this.getMovies();
+  }
+  render() {
+    const { isLoading, movies } = this.state;
+    return (
+      <section className="container">
+        {isLoading ? (
+          <div className="loader">
+            <span className="loader__text">Loading...</span>
+          </div>
+        ) : (
+          <div className="movies">
+            {movies.map((movie) => (
+              <Movie
+                key={movie.id}
+                id={movie.id}
+                year={movie.year}
+                title={movie.title}
+                summary={movie.summary}
+                poster={movie.medium_cover_image}
+                genres={movie.genres}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+    );
+  }
 }
 
 export default App;
